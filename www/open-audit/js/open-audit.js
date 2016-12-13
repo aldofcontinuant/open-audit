@@ -16,6 +16,12 @@ $(document).ready(function () {
     })
 });
 
+$(document).ready(function(){
+    $(function(){
+        $(".table").tablesorter();
+    });
+});
+
 /* select all devices on /devices for bulk edit */
 $(document).ready(function() {
     $(':checkbox[name=select-all]').click (function () {
@@ -49,6 +55,7 @@ $(document).ready(function () {
         var $id = $(this).attr('data-id');
         var $name = $(this).attr('data-name');
         var $url = baseurl + 'index.php/' + collection + '/' + $id;
+        //alert($url);
         $.ajax({
             type: 'DELETE',
             url: $url,
@@ -136,7 +143,8 @@ $(document).ready(function () {
             $(this).html('<span class="glyphicon glyphicon-edit" aria-hidden="true"></span>');
             $(this).attr("data-action", "edit");
             $(this).attr("class", "btn btn-default edit_button");
-            document.getElementById('submit_'+attribute).remove();
+            //document.getElementById('submit_'+attribute).remove();
+            $('#submit_' + attribute).remove();
         }
         if (action === "submit") {
             var item = document.getElementById(attribute);
@@ -159,7 +167,7 @@ $(document).ready(function () {
                 type: "PATCH",
                 url: id,
                 contentType: "application/json",
-                data: {data},
+                data: {data : data},
                 success: function (data) {
                     /* alert( 'success' ); */
                 },
@@ -172,11 +180,13 @@ $(document).ready(function () {
             $(edit_button).html('<span class="glyphicon glyphicon-edit" aria-hidden="true"></span>');
             $(edit_button).attr("data-action", "edit");
             $(edit_button).attr("class", "btn btn-default edit_button");
-            document.getElementById('submit_' + attribute).remove();
+            //document.getElementById('submit_'+attribute).remove();
+            $('#submit_' + attribute).remove();
         }
     });
 });
 
+/* Get Lat/Long from Google Maps API on update locations page */
 $(document).ready(function () {
     $(document).on('click', '.locations_latlong', function (e) {
         var address = "";
@@ -187,29 +197,32 @@ $(document).ready(function () {
         }
         $('#latitude').val('');
         $('#longitude').val('');
-        $('#latitude').attr("disabled", false);
-        $('#longitude').attr("disabled", false);
         var geocoder = new google.maps.Geocoder();
         if (geocoder) {
             geocoder.geocode({'address': address}, function (results, status) {
                 if (status === google.maps.GeocoderStatus.OK) {
-                   $('#latitude').val(results[0].geometry.location.lat());
-                   $('#longitude').val(results[0].geometry.location.lng());
+                    $('#longitude').val(results[0].geometry.location.lng());
+                    $('#edit_longitude').click();
+                    $('#latitude').val(results[0].geometry.location.lat());
+                    $('#edit_latitude').click();
                 }
             });
         }
     });
 });
 
+/* Make Geo on update locations page */
 $(document).ready(function () {
     $(document).on('click', '.locations_geocode', function (e) {
         var address = $('#address').val() + ", " + $('#city').val() + ", " + $('#state').val() + ", " + $('#postcode').val() + ", " + $('#country').val();
         $('#geo').val('');
         $('#geo').attr("disabled", false);
         $('#geo').val(address);
+        $('#edit_geo').click();
     });
 });
 
+/* Get Lat/Long from Google Maps API on create locations page */
 $(document).ready(function () {
     $(document).on('click', '.locations_latlong_c', function (e) {
         var address = "";
