@@ -165,7 +165,7 @@ if ($data['system']->type != 'computer') {
 
         <?php
         // the software categories
-        $software = array('software', 'service');
+        $software = array('software', 'service', 'software_key', 'server');
         $display_software = false;
         foreach ($software as $item) {
             if (isset($data[$item])) {
@@ -189,14 +189,14 @@ if ($data['system']->type != 'computer') {
                 foreach ($software as $item) {
                     if (isset($data[$item])) {
                     ?>
-                    <li class="list-group-item"><img alt="" src="<?php echo $this->config->config['oa_web_folder']; ?>/icons/<?php echo $item; ?>.svg"/><a href="#" data-menuitem="<?php echo $item; ?>"><?php echo __(ucfirst($item)); ?></a></li>
+                    <li class="list-group-item"><img alt="" src="<?php echo $this->config->config['oa_web_folder']; ?>/icons/<?php echo $item; ?>.svg"/><a href="#" data-menuitem="<?php echo $item; ?>"><?php echo __(ucwords(str_replace('_', ' ', $item))); ?></a></li>
                     <?php
                     }
                 }
-                if ($software_odbc) { ?>
+                if (!empty($software_odbc)) { ?>
                   <li class="list-group-item"><img alt="" src="<?php echo $this->config->config['oa_web_folder']; ?>/icons/software_odbc_driver.svg"/><a href="#" data-menuitem="software_odbc_driver">Software ODBC Driver</a></li>
                 <?php }
-                if ($software_update) { ?>
+                if (!empty($software_update)) { ?>
                   <li class="list-group-item"><img alt="" src="<?php echo $this->config->config['oa_web_folder']; ?>/icons/software_update.svg"/><a href="#" data-menuitem="software_update">Software Updates</a></li>
                 <?php } ?>
                 </ul>
@@ -588,13 +588,13 @@ if ($data['system']->type != 'computer') {
                         <div class="form-group">
                             <label for="printer_duplex" class="col-sm-4 control-label"><?php echo __('Printer Duplex')?></label>
                             <div class="col-sm-8 input-group">
-                                <input type="text" class="form-control" id="printer_duplex" placeholder="" value="<?php echo $data['system']->printer_duplex; ?>" disabled>
+                                <input type="text" class="form-control" id="printer_duplex" placeholder="" value="<?php echo $data['system']->printer_duplex; ?>" readonly>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="printer_colour" class="col-sm-4 control-label"><?php echo __('Printer Colour')?></label>
                             <div class="col-sm-8 input-group">
-                                <input type="text" class="form-control" id="printer_colour" placeholder="" value="<?php echo $data['system']->printer_color; ?>" disabled>
+                                <input type="text" class="form-control" id="printer_colour" placeholder="" value="<?php echo $data['system']->printer_color; ?>" readonly>
                             </div>
                         </div>
                         <?php
@@ -630,6 +630,7 @@ if ($data['system']->type != 'computer') {
                         -->
                         <a class="btn btn-default btn-block" href="<?php echo $this->response->links->self; ?>?sub_resource=credential&action=create" role="button"><?php echo __('Add Credentials'); ?></a>
                         <a class="btn btn-default btn-block" href="<?php echo $this->config->config['oa_web_folder']; ?>/index.php/discovery/discover_subnet/device/<?php echo $data['system']->id; ?>" role="button"><?php echo __('Discover'); ?></a>
+                        <a class="btn btn-default btn-block" href="<?php echo $this->response->links->self; ?>?sub_resource=attachment&action=create" role="button"><?php echo __('Add Attachment'); ?></a>
                         <a class="btn btn-default btn-block" href="#" onclick="window.open('<?php echo $this->config->config['oa_web_folder']; ?>/index.php/admin_system/system_snmp/<?php echo $data['system']->id; ?>', 'SNMP Scan', 'height=300,left=100,location=no,menubar=no,resizable=no,scrollbars=no,status=no,titlebar=no,toolbar=no,top=100,width=400');"><?php echo __('SNMP Scan'); ?></a>
 
                     </div>
@@ -859,6 +860,19 @@ if (isset($data['additional_fields']) and count($data['additional_fields']) > 0)
             </span>
           </div><!-- 6 -->
         </div><!-- 5 -->
+
+<div class="form-group"><!-- 5 -->
+          <label for="org_id" class="col-sm-4 control-label">Organisation ID</label>
+          <div class="col-sm-8 input-group"><!-- 6 -->
+            <input type="text" class="form-control" id="org_id" placeholder="" value="<?php echo $data['system']->org_id; ?>" disabled>
+            <span class="input-group-btn">
+              <button id="edit_org_id" data-action="edit" class="btn btn-default edit_button" type="button" data-attribute="org_id">
+                <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+              </button>
+            </span>
+          </div><!-- 6 -->
+        </div><!-- 5 -->
+
           <div class="form-group"><!-- 5 -->
           <label for="owner" class="col-sm-4 control-label">Comments</label>
           <div class="col-sm-8 input-group"><!-- 6 -->
@@ -883,7 +897,7 @@ if (isset($data['additional_fields']) and count($data['additional_fields']) > 0)
 
 <?php
 // software installed / odbc / updates
-$list = array('', 'odbc driver', 'update');
+$list = array('', 'odbc_driver', 'update');
 foreach ($list as $item) {
     if (isset($data['software']) and count($data['software']) > 0) {
       if ($item == '') {
@@ -895,8 +909,8 @@ foreach ($list as $item) {
         <div id="<?php echo $id . str_replace(' ', '_', $item); ?>" class="section">
             <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title pull-left">Software <?php echo __(ucwords($item)); ?></h3>
-            <span class="glyphicon glyphicon-remove-circle pull-right myCloseButton" data-menuitem="software_<?php echo $item; ?>"></span>
+            <h3 class="panel-title pull-left">Software <?php echo __(ucwords(str_replace('_', ' ', $item))); ?></h3>
+            <span class="glyphicon glyphicon-remove-circle pull-right myCloseButton" data-menuitem="<?php echo $id . $item; ?>"></span>
             <div class="clearfix"></div>
           </div>
               <div class="panel-body">
@@ -937,10 +951,64 @@ foreach ($list as $item) {
 ?>
 
 
+    
+        <div id="attachment" class="section">
+            <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title pull-left">Attachments</h3>
+            <span class="glyphicon glyphicon-remove-circle pull-right myCloseButton" data-menuitem="attachment"></span>
+            <div class="clearfix"></div>
+          </div>
+              <div class="panel-body">
+              <?php if (isset($data['attachment']) and count($data['attachment']) > 0) { ?>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Filename</th>
+                            <th>Edited By</th>
+                            <th>Edited Date</th>
+                            <th style="text-align:center;">Download</td>
+                            <th style="text-align:center;">Delete</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        foreach ($data['attachment'] as $item) {
+                            if (php_uname('s') == 'Windows NT') {
+                                $i = explode('\\', $item->filename);
+                            } else {
+                                $i = explode('/', $item->filename);
+                            }
+                            $filename = $i[count($i)-1];
+                            $filename = preg_replace('/'.$data['system']->id . '_/', '', $filename, 1);
+                            echo '<tr>';
+                            echo "<td>" . $item->id . "</td>";
+                            echo "<td>" . $item->title . "</td>";
+                            echo "<td>" . $filename . "</td>";
+                            echo "<td>" . $item->edited_by . "</td>";
+                            echo "<td>" . $item->edited_date . "</td>";
+                            ?>
+                            <td class="text-center"><a class="btn btn-sm btn-primary" href="<?php echo $this->response->links->self; ?>?sub_resource=attachment&sub_resource_id=<?php echo intval($item->id); ?>&action=download"><span class="glyphicon glyphicon-download" aria-hidden="true"></span></a></td>
+                            <td style="text-align:center;"><button type="button" class="btn btn-sm btn-danger" aria-label="Left Align" ><span class="glyphicon glyphicon-trash subresource_delete_link" data-sub-resource-id="<?php echo intval($item->id); ?>" data-sub-resource="attachment" data-name="<?php echo htmlspecialchars($item->title, REPLACE_FLAGS, CHARSET); ?>" aria-hidden="true"></span></button></td>
+                            <?php
+                            echo '</tr>';
+                        }
+                        ?>
+                    </tbody>
+                </table>
+                <?php } ?>
+              </div>
+            </div>
+        </div>
+    
+
+
 <?php
 // table style displays
 #$list = array ('alert_log', 'attachment', 'audit_log', 'change_log', 'custom', 'dns', 'file', 'key', 'log', 'memory', 'module', 'monitor', 'netstat', 'optical', 'print_queue', 'route', 'san', 'service', 'share', 'software', 'sound', 'user', 'video', 'disk', 'partition');
-$list = array ('alert_log', 'attachment', 'audit_log', 'change_log', 'edit_log', 'dns', 'file', 'key', 'log', 'memory', 'module', 'monitor', 'netstat', 'nmap', 'optical', 'print_queue', 'route', 'san', 'service', 'share', 'sound', 'user', 'user_group', 'video', 'variable', 'vm');
+$list = array ('alert_log', 'audit_log', 'change_log', 'discovery_log', 'edit_log', 'dns', 'file', 'log', 'memory', 'module', 'monitor', 'netstat', 'nmap', 'optical', 'print_queue', 'route', 'san', 'service', 'share', 'software_key', 'sound', 'user', 'user_group', 'video', 'variable', 'vm');
 if ($data['system']->type != 'computer' and !empty($data['disk'])) {
   $list[] = 'disk';
 }
@@ -950,7 +1018,7 @@ foreach ($list as $item) {
         <div id="<?php echo $item; ?>" class="section">
             <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title pull-left"><?php echo __(ucfirst($item)); ?></h3>
+            <h3 class="panel-title pull-left"><?php echo __(ucwords(str_replace('_', ' ', $item))); ?></h3>
             <span class="glyphicon glyphicon-remove-circle pull-right myCloseButton" data-menuitem="<?php echo $item; ?>"></span>
             <div class="clearfix"></div>
           </div>
@@ -1024,7 +1092,11 @@ foreach ($list as $item) {
                                             if (is_int($value)) {
                                                 echo "<td class=\"text-right\">" . number_format($value) . "</td>\n";
                                             } else {
+                                              if (strlen($value) > 40) {
+                                                echo "<td class=\"wrap\">" . $value . "</td>\n";
+                                              } else {
                                                 echo "<td>" . $value . "</td>\n";
+                                              }
                                             }
                                         }
                                     }
@@ -1050,7 +1122,9 @@ foreach ($list as $item) {
 <?php
 // combo style displays
 if ($data['system']->type == 'computer') {
-    $list = array ('network' => 'ip', 'disk' => 'partition');
+    $list = array ('network' => 'ip',
+                   'disk' => 'partition',
+                   'server' => 'server_item');
     foreach ($list as $item => $sub_item) {
         if (isset($data[$item]) and count($data[$item]) > 0) {
         ?>
@@ -1071,6 +1145,7 @@ if ($data['system']->type == 'computer') {
                         $count = 0;
                         echo '<div class="col-md-6">';
                         foreach ($item_row as $key => $value) {
+                          $id = $item_row->id;
                             if ($key != 'id' and $key != 'system_id' and $key != 'current' and $key != 'first_seen' and $key != 'last_seen') {
                                 $count++;
                                 $show_key = ucwords(str_replace('_', ' ', $key));
@@ -1079,9 +1154,9 @@ if ($data['system']->type == 'computer') {
                                 }
                                 ?>
                                 <div class="form-group">
-                                    <label for="<?php echo $item . '_' . $key; ?>" class="col-sm-4 control-label"><?php echo __($show_key)?></label>
+                                    <label for="<?php echo $item . '_' . $key . '_' . $id; ?>" class="col-sm-4 control-label"><?php echo __($show_key)?></label>
                                     <div class="col-sm-8 input-group">
-                                        <input type="text" class="form-control" id="<?php echo $item . '_' . $key; ?>" placeholder="" value="<?php echo $value; ?>" readonly>
+                                        <input type="text" class="form-control" id="<?php echo $item . '_' . $key . '_' . $id; ?>" placeholder="" value="<?php echo $value; ?>" readonly>
                                     </div>
                                 </div>
                             <?php
@@ -1111,7 +1186,9 @@ if ($data['system']->type == 'computer') {
                                 <tbody>
                                     <?php
                                     foreach ($data[$sub_item] as $sub_row) {
-                                        if (($item == 'network' and $item_row->net_index == $sub_row->net_index) or ($item == 'disk' and $item_row->hard_drive_index == $sub_row->hard_drive_index)) { ?>
+                                        if (($item == 'network' and $item_row->net_index == $sub_row->net_index) or 
+                                            ($item == 'disk' and $item_row->hard_drive_index == $sub_row->hard_drive_index) or
+                                            ($item == 'server' and $item_row->name == $sub_row->parent_name)) { ?>
                                             <tr>
                                                 <?php
                                                 foreach ($sub_row as $sub_key => $sub_value) {
@@ -1138,6 +1215,7 @@ if ($data['system']->type == 'computer') {
                             ?>
                         </div>
                     </div>
+                    <br /><br />
                     <?php
                     }
                     ?>
