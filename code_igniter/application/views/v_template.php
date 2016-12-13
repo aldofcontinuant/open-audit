@@ -43,8 +43,23 @@ if (!isset($this->user->theme) or $this->user->theme == '') {
 
 if (file_exists(str_replace('v_template.php', 'theme-bootstrap/'.$include.'.php', __FILE__))) {
     $this->user->theme = 'bootstrap';
+} else {
+	if (file_exists(str_replace('v_template.php', 'theme-tango/'.$include.'.php', __FILE__))) {
+    	$this->user->theme = 'tango';
+    } else {
+    	redirect("/");
+    }
 }
 
+# Define our constans for use in htmlspecialchars
+if (!defined('CHARSET')) {
+    define('CHARSET', 'UTF-8');
+    if (phpversion() >= 5.4) {
+        define('REPLACE_FLAGS', ENT_COMPAT | ENT_XHTML);
+    } else {
+        define('REPLACE_FLAGS', ENT_COMPAT);
+    }
+}
 
 $oa_web_index    = htmlentities($this->config->item('oa_web_index'));
 $oa_web_folder   = htmlentities($this->config->item('oa_web_folder'));
