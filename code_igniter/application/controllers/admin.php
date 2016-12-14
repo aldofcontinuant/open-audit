@@ -5147,6 +5147,14 @@ class admin extends MY_Controller
             $sql[] = "ALTER TABLE system ADD KEY ip (`ip`)";
             $sql[] = "ALTER TABLE system ADD KEY name (`name`)";
 
+            # delete any orphaned rows
+            $tables = array('audit_log', 'bios', 'change_log', 'disk', 'dns', 'graph', 'ip', 'log', 'memory', 'module', 'monitor', 'motherboard', 'netstat', 'network', 'oa_group_sys', 'optical', 'pagefile', 'partition', 'print_queue', 'processor', 'route', 'san', 'scsi', 'server', 'server_item', 'service', 'share', 'software', 'software_key', 'sound', 'sys_man_additional_fields_data', 'sys_man_attachment', 'sys_man_notes', 'task', 'user', 'user_group', 'variable', 'video', 'vm', 'warranty', 'windows');
+            foreach ($tables as $table) {
+                if ($this->db->field_exists('system_id', $table)) {
+                    $sql[] = "DELETE FROM `" . $table . "` WHERE `" . $table . "`.`system_id` NOT IN (SELECT system.id FROM system)";
+                }
+            }
+
             # recreate the indexes
             $sql[] = "ALTER TABLE audit_log ADD CONSTRAINT audit_log_system_id FOREIGN KEY (system_id) REFERENCES system (id) ON DELETE CASCADE";
             $sql[] = "ALTER TABLE bios ADD CONSTRAINT bios_system_id FOREIGN KEY (system_id) REFERENCES system (id) ON DELETE CASCADE";
