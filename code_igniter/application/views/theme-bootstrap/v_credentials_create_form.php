@@ -135,7 +135,7 @@ $(document).ready(function(){
         </div>';
     
     var $snmp_v3_text = '        <div class="form-group">\
-            <label for="data[attributes][credentials][security_name]" class="col-sm-2 control-label">Security Name</label>\
+            <label for="data[attributes][credentials][security_name]" class="col-sm-2 control-label">User / Security Name</label>\
             <div class="col-sm-4">\
                 <div class="col-sm-8 input-group">\
                     <input tabindex="4" type="text" class="form-control" id="data[attributes][credentials][security_name]" name="data[attributes][credentials][security_name]" placeholder="" value="">\
@@ -166,7 +166,7 @@ $(document).ready(function(){
             </div>\
         </div>\
         <div class="form-group">\
-            <label for="data[attributes][credentials][authentication_passphrase]" class="col-sm-2 control-label">Authentication Passphrase</label>\
+            <label for="data[attributes][credentials][authentication_passphrase]" class="col-sm-2 control-label">User / Authentication Passphrase</label>\
             <div class="col-sm-4">\
                 <div class="col-sm-8 input-group">\
                     <input tabindex="7" type="password" class="form-control" id="data[attributes][credentials][authentication_passphrase]" name="data[attributes][credentials][authentication_passphrase]" placeholder="" value="">\

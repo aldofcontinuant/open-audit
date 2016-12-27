@@ -150,7 +150,7 @@ $item = $this->response->data[0];
 
         <?php if ($item->attributes->type == 'snmp_v3') { ?>
         <div class="form-group">
-            <label for="credentials.security_name" class="col-sm-2 control-label">Security Name</label>
+            <label for="credentials.security_name" class="col-sm-2 control-label">User / Security Name</label>
             <div class="col-sm-4">
                 <div class="col-sm-8 input-group">
                     <input type="text" class="form-control" id="credentials.security_name" name="credentials.security_name" placeholder="" value="<?php echo htmlentities($item->attributes->credentials->security_name); ?>" disabled>
@@ -205,7 +205,7 @@ $item = $this->response->data[0];
 
         <?php if ($item->attributes->type == 'snmp_v3') { ?>
         <div class="form-group">
-            <label for="credentials.authentication_passphrase" class="col-sm-2 control-label">Authentication Passphrase</label>
+            <label for="credentials.authentication_passphrase" class="col-sm-2 control-label">User / Authentication Passphrase</label>
             <div class="col-sm-4">
                 <div class="col-sm-8 input-group">
                     <input type="password" class="form-control" id="credentials.authentication_passphrase" name="credentials.authentication_passphrase" placeholder="" value="<?php echo htmlentities($item->attributes->credentials->authentication_passphrase); ?>" disabled>
