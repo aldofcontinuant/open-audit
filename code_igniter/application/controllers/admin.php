@@ -5148,6 +5148,12 @@ class admin extends MY_Controller
             $sql[] = "ALTER TABLE system ADD KEY name (`name`)";
 
             # recreate the indexes
+            $tables = array('audit_log', 'bios', 'change_log', 'disk', 'dns', 'graph', 'ip', 'log', 'memory', 'module', 'monitor', 'motherboard', 'netstat', 'network', 'oa_group_sys', 'optical', 'pagefile', 'partition', 'print_queue', 'processor', 'route', 'san', 'scsi', 'server', 'server_item', 'service', 'share', 'software', 'software_key', 'sound', 'sys_man_additional_fields_data', 'sys_man_attachment', 'sys_man_notes', 'task', 'user', 'user_group', 'variable', 'video', 'vm', 'warranty', 'windows');
+            foreach ($tables as $table) {
+                if ($this->db->field_exists('system_id', $table)) {
+                    $sql[] = "DELETE FROM `" . $table . "` WHERE `" . $table . "`.`system_id` NOT IN (SELECT system.id FROM system)";
+                }
+            }
             $sql[] = "ALTER TABLE audit_log ADD CONSTRAINT audit_log_system_id FOREIGN KEY (system_id) REFERENCES system (id) ON DELETE CASCADE";
             $sql[] = "ALTER TABLE bios ADD CONSTRAINT bios_system_id FOREIGN KEY (system_id) REFERENCES system (id) ON DELETE CASCADE";
             $sql[] = "ALTER TABLE change_log ADD CONSTRAINT change_log_system_id FOREIGN KEY (system_id) REFERENCES system (id) ON DELETE CASCADE";
@@ -5535,6 +5541,34 @@ class admin extends MY_Controller
             unset($log_details);
         }
 
+        if (($db_internal_version < '20160811') and ($this->db->platform() == 'mysql')) {
+            # upgrade for 1.12.10
+
+            $log_details = new stdClass();
+            $log_details->file = 'system';
+            $log_details->message = 'Upgrade database to 1.12.10 commenced';
+            stdlog($log_details);
+
+            # initialise our $sql array
+            unset($sql);
+            $sql = array();
+
+            
+
+            $sql[] = "UPDATE oa_config SET config_value = '20160811' WHERE config_name = 'internal_version'";
+            $sql[] = "UPDATE oa_config SET config_value = '1.12.10' WHERE config_name = 'display_version'";
+
+            foreach ($sql as $this_query) {
+                $log_details->message = $this_query;
+                stdlog($log_details);
+                $this->data['output'] .= $this_query."<br /><br />\n";
+                $query = $this->db->query($this_query);
+            }
+
+            $log_details->message = 'Upgrade database to 1.12.10 completed';
+            stdlog($log_details);
+            unset($log_details);
+        }
 
         # refresh the icons
         $this->load->model('m_system');
