@@ -40,7 +40,7 @@ if (count($query) > 0) {
 	<thead>
 		<tr>
 			<th><?php echo __('Name')?></th>
-			<th align='center' width="120" class='{sorter: false}'><?php echo __('Edit Report')?></th>
+			<!-- <th align='center' width="120" class='{sorter: false}'><?php echo __('Edit Report')?></th> -->
 			<th align='center' width="120" class='{sorter: false}'><?php echo __('Export Report')?></th>
 			<th align='center' width="120" class='{sorter: false}'><?php echo __('Delete Report')?></th>
 		</tr>
@@ -56,7 +56,7 @@ if (count($query) > 0) {
                     ?>
         			<tr>
         				<td><?php echo htmlentities(__($key->report_name))?></td>
-        				<td align='center'><?php echo $edit_pic?></td>
+        				<!-- <td align='center'><?php echo $edit_pic?></td> -->
         				<td align='center'><?php echo $export_pic?></td>
         				<td align='center'><?php echo $delete_pic?></td>
         			</tr>
