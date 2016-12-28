@@ -114,7 +114,11 @@ fi
 system_timestamp=`date +'%F %T'`
 system_uuid=`system_profiler SPHardwareDataType | grep "Hardware UUID:" | cut -d":" -f2 | sed 's/^ *//g'`
 system_hostname=`hostname | cut -d. -f1`
-system_domain=`hostname | cut -d. -f2-`
+if [[ $system_hostname == *"."* ]]; then
+    system_domain=`hostname | cut -d. -f2-`
+else
+    system_domain=""
+fi
 system_os_version=`sw_vers | grep "ProductVersion:" | cut -f2`
 system_os_name="OSX $system_os_version"
 system_serial=`system_profiler SPHardwareDataType | grep "Serial Number (system):" | cut -d":" -f2 | sed 's/^ *//g'`
@@ -306,8 +310,14 @@ for disk in $(diskutil list | grep "^/" | cut -d/ -f3 | cut -d" " -f1); do
     hard_drive_index=$disk
     hard_drive_caption=$(diskutil info "$disk" | grep "^ " | grep "Device / Media Name:" | cut -d":" -f2- | sed 's/^ *//g')
     hard_drive_interface_type=$(diskutil info "$disk" | grep "^ " | grep "Protocol:" | cut -d":" -f2- | sed 's/^ *//g')
-    hard_drive_size=$(diskutil info "$disk" | grep "^ " | grep "Total Size:" | cut -d":" -f2- | sed 's/^ *//g' | cut -d" " -f3 | cut -d"(" -f2)
-    hard_drive_size=$(echo "$hard_drive_size / 1000 / 1000 " | bc | cut -d"." -f1)
+    if [ "$system_os_version" > "10.11" ]; then
+        hard_drive_size=$(diskutil info "$disk" | grep "^ " | grep "Disk Size:" | cut -d":" -f2- | sed 's/^ *//g' | cut -d" " -f3 | cut -d"(" -f2)
+        hard_drive_size=$(echo "$hard_drive_size / 1000 / 1000 " | bc | cut -d"." -f1)
+    else
+        hard_drive_size=$(diskutil info "$disk" | grep "^ " | grep "Total Size:" | cut -d":" -f2- | sed 's/^ *//g' | cut -d" " -f3 | cut -d"(" -f2)
+        hard_drive_size=$(echo "$hard_drive_size / 1000 / 1000 " | bc | cut -d"." -f1)
+    fi
+    
     hard_drive_device_id=$(diskutil info "$disk" | grep "^ " | grep "Device Node:" | cut -d":" -f2- | sed 's/^ *//g')
     hard_drive_status=$(diskutil info "$disk" | grep "^ " | grep "SMART Status:" | cut -d":" -f2- | sed 's/^ *//g')
     hard_drive_manufacturer=""
@@ -336,12 +346,17 @@ for disk in $(diskutil list | grep "^/" | cut -d/ -f3 | cut -d" " -f1); do
         partition_mount_point=$(diskutil info "$disk" | grep "^ " | grep "Mount Point:" | cut -d":" -f2- | sed 's/^ *//g')
         partition_name=$(diskutil info "$disk" | grep "^ " | grep "Volume Name:" | cut -d":" -f2- | sed 's/^ *//g')
         partition_size="$hard_drive_size"
-        partition_free_space=$(diskutil info "$disk" | grep "^ " | grep "Volume Free Space:" | cut -d":" -f2- | sed 's/^ *//g' | cut -d" " -f3 | cut -d"(" -f2)
-        partition_free_space=$(echo "$partition_free_space / 1000 / 1000 " | bc | cut -d"." -f1)
+        if [ "$system_os_version" > "10.11" ]; then
+            partition_free_space=""
+            partition_used_space=""
+        else
+            partition_free_space=$(diskutil info "$disk" | grep "^ " | grep "Volume Free Space:" | cut -d":" -f2- | sed 's/^ *//g' | cut -d" " -f3 | cut -d"(" -f2)
+            partition_free_space=$(echo "$partition_free_space / 1000 / 1000 " | bc | cut -d"." -f1)
+            partition_used_space=$(echo "$partition_size - $partition_free_space" | bc | cut -d"." -f1)
+        fi
         partition_format=$(diskutil info "$disk" | grep "^ " | grep "File System Personality:" | cut -d":" -f2- | sed 's/^ *//g')
         partition_caption=$(diskutil info "$disk" | grep "^ " | grep "Volume Name:" | cut -d":" -f2- | sed 's/^ *//g')
         partition_disk_index=$(system_profiler SPStorageDataType | grep "Volume UUID: $partition_device_id" -A20 | grep "Physical Volumes:" -A1 | grep -v "Physical" | cut -d":" -f1 | sed 's/^ *//g')
-        partition_used_space=$(echo "$partition_size - $partition_free_space" | bc | cut -d"." -f1)
         partition_each="$partition_each       <item>"$'\n'
         partition_each="$partition_each           <serial>$partition_serial</serial>"$'\n'
         partition_each="$partition_each           <hard_drive_index>$hard_drive_index</hard_drive_index>"$'\n'
@@ -378,15 +393,22 @@ for disk in $(diskutil list | grep "^/" | cut -d/ -f3 | cut -d" " -f1); do
             if [ "$partition_name" == "Not applicable (no file system)" ]; then
                 partition_name=$(diskutil info "$partition" | grep "^ " | grep "Device / Media Name:" | cut -d":" -f2- | sed 's/^ *//g' | sed 's/ *$//g')
             fi
-            partition_size=$(diskutil info "$partition" | grep "^ " | grep "Total Size:" | cut -d":" -f2- | sed 's/^ *//g' | cut -d" " -f3 | cut -d"(" -f2)
+            if [ "$system_os_version" > "10.11" ]; then
+                # Sierra has removed 'Volume Free Space' and changed 'Total Size' to 'Disk Size' in diskutil
+                partition_size=$(diskutil info "$partition" | grep "^ " | grep "Disk Size:" | cut -d":" -f2- | sed 's/^ *//g' | cut -d" " -f3 | cut -d"(" -f2)
+                partition_free_space=""
+                partition_used_space=""
+            else
+                partition_size=$(diskutil info "$partition" | grep "^ " | grep "Total Size:" | cut -d":" -f2- | sed 's/^ *//g' | cut -d" " -f3 | cut -d"(" -f2)
+                partition_free_space=$(diskutil info "$partition" | grep "^ " | grep "Volume Free Space:" | cut -d":" -f2- | sed 's/^ *//g' | cut -d" " -f3 | cut -d"(" -f2)
+                partition_free_space=$(echo "$partition_free_space / 1000 / 1000" | bc | cut -d"." -f1)
+                partition_used_space=$(echo "$partition_size - $partition_free_space" | bc | cut -d"." -f1)
+            fi
             partition_size=$(echo "$partition_size / 1000 / 1000" | bc | cut -d"." -f1)
-            partition_free_space=$(diskutil info "$partition" | grep "^ " | grep "Volume Free Space:" | cut -d":" -f2- | sed 's/^ *//g' | cut -d" " -f3 | cut -d"(" -f2)
-            partition_free_space=$(echo "$partition_free_space / 1000 / 1000" | bc | cut -d"." -f1)
             partition_format=$(diskutil info "$partition" | grep "^ " | grep "File System Personality:" | cut -d":" -f2 | sed 's/^ *//g' | sed 's/ *$//g')
             partition_caption=$(diskutil info "$partition" | grep "^ " | grep "Volume Name:" | cut -d":" -f2 | sed 's/^ *//g' | sed 's/ *$//g')
             partition_device_id=$(diskutil info "$partition" | grep "^ " | grep "Volume UUID:" | cut -d":" -f2 | sed 's/^ *//g' | sed 's/ *$//g')
             partition_disk_index=$(diskutil info "$partition" | grep "^ " | grep "Device Identifier:" | cut -d":" -f2 | sed 's/^ *//g' | sed 's/ *$//g')
-            partition_used_space=$(echo "$partition_size - $partition_free_space" | bc | cut -d"." -f1)
             partition_each="$partition_each       <item>"$'\n'
             partition_each="$partition_each           <serial>$partition_serial</serial>"$'\n'
             partition_each="$partition_each           <hard_drive_index>$hard_drive_index</hard_drive_index>"$'\n'
