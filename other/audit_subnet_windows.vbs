@@ -30,6 +30,10 @@
 ' @copyright Copyright (c) 2014, Opmantek
 ' @license http://www.gnu.org/licenses/agpl-3.0.html aGPL v3
 
+wscript.echo "-------ATTENTION------"
+wscript.echo "This script has been deprecated. Please use the discover_subnet.vbs script instead."
+wscript.echo "----------------------"
+wscript.echo ""
 
 ' the number of audits to run concurrently
 number_of_audits = 25
