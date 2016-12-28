@@ -366,21 +366,36 @@ if (! function_exists('copy_to_windows')) {
             $password = str_replace("'", "", escapeshellarg($password));
             $username = str_replace("'", "", escapeshellarg($credentials->credentials->username));
             $command = 'smbclient \\\\\\\\'.$ip.'\\\\' . $share . ' -U "' . $username . '%' . $password . '" -c "put ' . $source . ' ' . $destination . ' 2>&1"';
-            #$command = "smbclient \\\\\\\\$ip\\" . $share . ' -U "' . $username . '%' . $password . '" -c "put ' . $source . ' ' . $destination . ' 2>&1"';
             exec($command, $output, $return_var);
             if ($display == 'y') {
                 echo 'DEBUG - Windows Copy Command: ' . str_replace($password, '******', $command) . "\n";
             }
             if ($return_var == 0) {
-                $log->message = 'Linux attempt to copy file to ' . $ip . ' succeeded in wmi_helper::copy_to_windows';
+                $log->message = 'Linux attempt (1) to copy file to ' . $ip . ' succeeded in wmi_helper::copy_to_windows';
                 $log->severity = 7;
                 stdlog($log);
                 return true;
             } else {
-                $log->message = 'Linux attempt to copy file to ' . $ip . ' failed in wmi_helper::copy_to_windows. Error:' . $output[0];
+                $log->message = 'Linux attempt (1) to copy file to ' . $ip . ' failed in wmi_helper::copy_to_windows. Error:' . $output[0];
                 $log->severity = 5;
                 stdlog($log);
-                return false;
+                $temp = explode('@', $credentials->credentials->username);
+                $command = 'smbclient \\\\\\\\'.$ip.'\\\\' . $share . ' -U "' . $temp[1] . '\\' . $temp[0] . '%' . $password . '" -c "put ' . $source . ' ' . $destination . ' 2>&1"';
+                exec($command, $output, $return_var);
+                if ($display == 'y') {
+                    echo 'DEBUG - Windows Copy Command: ' . str_replace($password, '******', $command) . "\n";
+                }
+                if ($return_var == 0) {
+                    $log->message = 'Linux attempt (2) to copy file to ' . $ip . ' succeeded in wmi_helper::copy_to_windows';
+                    $log->severity = 7;
+                    stdlog($log);
+                    return true;
+                } else {
+                    $log->message = 'Linux attempt (2) to copy file to ' . $ip . ' failed in wmi_helper::copy_to_windows. Error:' . $output[0];
+                    $log->severity = 5;
+                    stdlog($log);
+                    return false;
+                }
             }
         }
 
@@ -516,7 +531,7 @@ if (! function_exists('wmi_command')) {
             $domain = $temp[1];
             unset($temp);
             $filepath = dirname(dirname(dirname(dirname(dirname(__FILE__)))))."/open-audit/other";
-            $command_string = 'winexe -U ' . $domain . '/' . $username . '%' . $password . ' //' . $ip . ' \'wmic ' . $command . '\'';
+            $command_string = '/usr/local/bin/winexe -U ' . $domain . '/' . $username . '%' . $password . ' //' . $ip . ' \'wmic ' . $command . '\'';
             exec($command_string, $return['output'], $return['status']);
         }
 
