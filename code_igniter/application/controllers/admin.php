@@ -5561,7 +5561,47 @@ class admin extends MY_Controller
             unset($sql);
             $sql = array();
 
-            
+
+            # configuration
+            $sql[] = "UPDATE `oa_config` SET config_name = 'match_ip', config_description = 'Should we match a device based on its ip.' WHERE config_name = 'discovery_ip_match'";
+
+            $sql[] = "UPDATE `oa_config` SET config_name = 'match_mac', config_description = 'Should we match a device based on its mac address.' WHERE config_name = 'discovery_mac_match'";
+
+            $sql[] = "UPDATE `oa_config` SET config_name = 'match_hostname', config_description = 'Should we match a device based only on its hostname.' WHERE config_name = 'discovery_name_match'";
+
+            $sql[] = "UPDATE `oa_config` SET config_name = 'match_serial' WHERE config_name = 'discovery_serial_match'";
+
+            if (!isset($this->config->config['match_dbus'])) {
+                $sql[] = "INSERT INTO `oa_config` VALUES ('match_dbus','n','y',NOW(),0,'Should we match a device based on its dbus id.')";
+            }
+
+            if (!isset($this->config->config['match_uuid'])) {
+                $sql[] = "INSERT INTO `oa_config` VALUES ('match_uuid','y','y',NOW(),0,'Should we match a device based on its UUID.')";
+            }
+
+            if (!isset($this->config->config['match_hostname_dbus'])) {
+                $sql[] = "INSERT INTO `oa_config` VALUES ('match_hostname_dbus','y','y',NOW(),0,'Should we match a device based on its hostname and dbus id.')";
+            }
+
+            if (!isset($this->config->config['match_hostname_uuid'])) {
+                $sql[] = "INSERT INTO `oa_config` VALUES ('match_hostname_uuid','y','y',NOW(),0,'Should we match a device based on its hostname and UUID.')";
+            }
+
+            if (!isset($this->config->config['match_hostname_serial'])) {
+                $sql[] = "INSERT INTO `oa_config` VALUES ('match_hostname_serial','y','y',NOW(),0,'Should we match a device based on its hostname and serial.')";
+            }
+
+            if (!isset($this->config->config['match_serial_type'])) {
+                $sql[] = "INSERT INTO `oa_config` VALUES ('match_serial_type','y','y',NOW(),0,'Should we match a device based on its serial and type.')";
+            }
+
+            if (!isset($this->config->config['match_fqdn'])) {
+                $sql[] = "INSERT INTO `oa_config` VALUES ('match_fqdn','y','y',NOW(),0,'Should we match a device based on its fqdn.')";
+            }
+
+            if (!isset($this->config->config['match_mac_vmware'])) {
+                $sql[] = "INSERT INTO `oa_config` VALUES ('match_mac_vmware','n','y',NOW(),0,'Should we match a device based mac address even if it\'s a known likely duplicate from VMware.')";
+            }
 
             $sql[] = "UPDATE oa_config SET config_value = '20160811' WHERE config_name = 'internal_version'";
             $sql[] = "UPDATE oa_config SET config_value = '1.12.10' WHERE config_name = 'display_version'";
