@@ -1256,17 +1256,17 @@ class M_devices_components extends MY_Model
                 `partition`.`id` as partition_id, `partition`.`mount_point`, `partition`.`name` as partition_name
             FROM `system`, `oa_group_sys`, `partition`
             WHERE
-                system.id = oa_group_sys.system_id AND
-                partition.current = 'y' AND
-                system.id = partition.system_id AND
-                partition.mount_point > '' AND
-                oa_group_sys.group_id = ? AND
-                partition.mount_point != ''
+                `system`.`id` = `oa_group_sys`.`system_id` AND
+                `partition`.`current` = 'y' AND
+                `system`.`id` = `partition`.`system_id` AND
+                `partition`.`mount_point` > '' AND
+                `oa_group_sys`.`group_id` = ? AND
+                `partition`.`mount_point` != ''
             GROUP BY
-                system.name, partition.mount_point
+                `system`.`name`, `partition`.`mount_point`
             ORDER BY
                 system.name,
-                partition.mount_point ";
+                `partition`.`mount_point` ";
         $sql = $this->clean_sql($sql);
         $data = array($group_id);
         $query = $this->db->query($sql, $data);
