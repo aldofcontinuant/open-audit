@@ -729,7 +729,7 @@ class San extends CI_Controller
                 stdlog($log_details);
                 unset($log_details);
                 $details->original_last_seen = "";
-                echo "SystemID (new): <a href='" . base_url() . "index.php/main/system_display/" . $details->id . "'>" . $details->id . "</a>.<br />\n";
+                echo "SystemID (new): <a href='" . base_url() . "index.php/devices/" . $details->id . "'>" . $details->id . "</a>.<br />\n";
             } else {
                 // update an existing system
                 $log_details = new stdClass();
@@ -741,7 +741,7 @@ class San extends CI_Controller
                 $details->original_last_seen_by = $this->m_devices_components->read($details->id, 'y', 'system', '', 'last_seen_by');
                 $details->original_last_seen = $this->m_devices_components->read($details->id, 'y', 'system', '', 'last_seen');
                 $this->m_system->update_system($details);
-                echo "SystemID (updated): <a href='" . base_url() . "index.php/main/system_display/" . $details->id . "'>" . $details->id . "</a>.<br />\n";
+                echo "SystemID (updated): <a href='" . base_url() . "index.php/devices/" . $details->id . "'>" . $details->id . "</a>.<br />\n";
             }
             $details->first_seen = $this->m_devices_components->read($details->id, 'y', 'system', '', 'first_seen');
             $temp_user = '';

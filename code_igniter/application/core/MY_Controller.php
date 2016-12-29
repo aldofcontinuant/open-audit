@@ -738,7 +738,7 @@ class MY_Controller extends CI_Controller
             }
             echo "\t\t\t<title><![CDATA[".$title."]]></title>\n";
             echo "\t\t\t<pubDate>".$pub_date."</pubDate>\n";
-            echo "\t\t\t<link>".site_url().'/main/system_display/'.$link."</link>\n";
+            echo "\t\t\t<link>".site_url().'/devices/'.$link."</link>\n";
             echo "\t\t\t<description><![CDATA[".$description."]]></description>\n";
             echo "\t\t\t<category>".$category."</category>\n";
             echo "\t\t\t<dc:creator><![CDATA[\"Mark Unwin\" <mark.unwin@gmail.com>]]></dc:creator>\n";
@@ -773,6 +773,7 @@ class MY_Controller extends CI_Controller
             $temp_url = $col_link.$col_var_name_sec;
             $temp_url = $this->relative_index.$col_link.$col_var_name_sec;
             $temp_url = str_replace($this->relative_index.'main/system_display', 'omk/oae/device_details', $temp_url);
+            $temp_url = str_replace($this->relative_index.'devices', 'omk/oae/device_details', $temp_url);
             $temp_url = str_replace($this->relative_index.'report/show_report', 'omk/oae/show_report', $temp_url);
             $temp_url = str_replace($this->relative_index.'report/', 'omk/oae/show_report/', $temp_url);
             $temp_url = str_replace($this->relative_index.'omk/oae', '/omk/oae', $temp_url);

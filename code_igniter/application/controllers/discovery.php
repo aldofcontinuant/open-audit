@@ -939,7 +939,7 @@ class discovery extends CI_Controller
                         // If we find a device and we're in DEBUG, output a result line.
                         if ($display == 'y') {
                             if (!empty($details->id)) {
-                                echo 'DEBUG - Device found with ID: <a href=\''.base_url().'index.php/main/system_display/'.$details->id.'\'>'.$details->id."</a>.\n";
+                                echo 'DEBUG - Device found with ID: <a href=\''.base_url().'index.php/devices/'.$details->id.'\'>'.$details->id."</a>.\n";
                             }
                         }
 
