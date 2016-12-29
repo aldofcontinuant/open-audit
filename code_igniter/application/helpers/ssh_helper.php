@@ -717,11 +717,11 @@ if (! function_exists('scp')) {
             $filepath = dirname(dirname(dirname(dirname(dirname(__FILE__)))))."\open-audit\other";
             if ($credentials->type == 'ssh') {
                 $password = str_replace('"', '\"', $password);
-                $command = $filepath . '\pscp.exe -pw "' . $password . '" ' . $source . ' ' . $user . '@' . $host . ':' . $destination;
+                $command = $filepath . '\pscp.exe -pw "' . $password . '" ' . $source . ' ' . $username . '@' . $ip . ':' . $destination;
                 $echo = str_replace($password, '******', $command);
                 exec($command, $return['output'], $return['status']);
             } elseif ($credentials->type == 'ssh_key') {
-                $command = $filepath . '\pscp.exe -i "' . $keyfile . '" ' . $source . ' ' . $user . '@' . $host . ':' . $destination;
+                $command = $filepath . '\pscp.exe -i "' . $keyfile . '" ' . $source . ' ' . $username . '@' . $ip . ':' . $destination;
                 $echo = $command;
                 exec($command, $return['output'], $return['status']);
             }
