@@ -1024,7 +1024,7 @@ class M_system extends MY_Model
 
     public function delete_systems_not_seen_days($days = 365)
     {
-        $sql = "DELETE FROM system WHERE DATE(last_seen < DATE_SUB(curdate(), INTERVAL " . intval($days) . " day)";
+        $sql = "DELETE FROM system WHERE DATE(last_seen) < DATE_SUB(curdate(), INTERVAL " . intval($days) . " day)";
         $sql = $this->clean_sql($sql);
         $query = $this->db->query($sql);
         $count = $this->db->affected_rows();
