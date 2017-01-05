@@ -5603,6 +5603,10 @@ class admin extends MY_Controller
                 $sql[] = "INSERT INTO `oa_config` VALUES ('match_mac_vmware','n','y',NOW(),0,'Should we match a device based mac address even if it\'s a known likely duplicate from VMware.')";
             }
 
+            # fix our user <-> org table
+            $sql[] = "DELETE FROM oa_user_org";
+            $sql[] = "INSERT INTO oa_user_org (id, user_id, org_id, access_level, permissions) SELECT NULL, id, 0, 10, '' FROM oa_user";
+
             $sql[] = "UPDATE oa_config SET config_value = '20160811' WHERE config_name = 'internal_version'";
             $sql[] = "UPDATE oa_config SET config_value = '1.12.10' WHERE config_name = 'display_version'";
 
