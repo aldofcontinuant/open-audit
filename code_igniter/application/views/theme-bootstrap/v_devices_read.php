@@ -27,7 +27,7 @@
 /**
  * @author Mark Unwin <marku@opmantek.com>
  *
- * @version 1.12.8
+ * @version 1.12.10
  *
  * @copyright Copyright (c) 2014, Opmantek
  * @license http://www.gnu.org/licenses/agpl-3.0.html aGPL v3
@@ -861,17 +861,25 @@ if (isset($data['additional_fields']) and count($data['additional_fields']) > 0)
           </div><!-- 6 -->
         </div><!-- 5 -->
 
-<div class="form-group"><!-- 5 -->
-          <label for="org_id" class="col-sm-4 control-label">Organisation ID</label>
-          <div class="col-sm-8 input-group"><!-- 6 -->
-            <input type="text" class="form-control" id="org_id" placeholder="" value="<?php echo $data['system']->org_id; ?>" disabled>
-            <span class="input-group-btn">
-              <button id="edit_org_id" data-action="edit" class="btn btn-default edit_button" type="button" data-attribute="org_id">
-                <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
-              </button>
-            </span>
-          </div><!-- 6 -->
-        </div><!-- 5 -->
+
+
+      <div class="form-group">
+        <label for="org_id" class="col-sm-4 control-label">Organisation</label>
+        <div class="col-sm-8 input-group">
+          <select class="form-control" id="org_id" name="org_id" placeholder="" disabled>
+            <?php
+            foreach ($this->response->included as $org) {
+                if ($org->type == 'orgs') {?>
+            <option value="<?php echo intval($org->id); ?>"<?php if ($data['system']->org_id == $org->id) { echo "selected"; } ?>><?php echo htmlentities($org->attributes->name); ?></option>
+            <?php
+                }
+            } ?>
+          </select>
+          <span class="input-group-btn">
+            <button id="edit_org_id" data-action="edit" class="btn btn-default edit_button" type="button" data-attribute="org_id"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></button>
+          </span>
+        </div>
+      </div>
 
           <div class="form-group"><!-- 5 -->
           <label for="owner" class="col-sm-4 control-label">Comments</label>

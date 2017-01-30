@@ -28,7 +28,7 @@
  * @author Mark Unwin <marku@opmantek.com>
  *
  * 
- * @version 1.12.8
+ * @version 1.12.10
  *
  * @copyright Copyright (c) 2014, Opmantek
  * @license http://www.gnu.org/licenses/agpl-3.0.html aGPL v3
@@ -452,6 +452,33 @@ class M_oa_config extends MY_Model
         if ($ip == '::1') {
             return true;
         }
+
+        if (stripos($ip, ':') !== false) {
+            // We have an IPv6 address. Try to convert it to a v4.
+            // Known prefix
+            $v4mapped_prefix_hex = '00000000000000000000ffff';
+            $v4mapped_prefix_bin = pack("H*", $v4mapped_prefix_hex);
+            // Or more readable when using PHP >= 5.4
+            # $v4mapped_prefix_bin = hex2bin($v4mapped_prefix_hex);
+            // Parse
+            $addr = $ip;
+            $addr_bin = inet_pton($addr);
+            if ($addr_bin === false) {
+              // Unparsable? How did they connect?!?
+            } else {
+                // Check prefix
+                if (substr($addr_bin, 0, strlen($v4mapped_prefix_bin)) == $v4mapped_prefix_bin) {
+                    // Strip prefix
+                    $addr_bin = substr($addr_bin, strlen($v4mapped_prefix_bin));
+                }
+                // Convert back to printable address in canonical form
+                $ip = inet_ntop($addr_bin);
+            }
+        }
+        if (stripos($ip, ':') !== false) {
+            return true;
+        }
+
         $sql = "SELECT COUNT(id) AS count FROM networks WHERE (-1 << (33 - INSTR(BIN(INET_ATON(cidr_to_mask(SUBSTR(name, LOCATE('/', name)+1)))), '0'))) & INET_ATON(?) = INET_ATON(SUBSTR(name, 1, LOCATE('/', name)-1))";
         $sql = $this->clean_sql($sql);
         $data = array("$ip");

@@ -28,8 +28,8 @@
 /**
  * @author Mark Unwin <marku@opmantek.com>
  *
- * 
- * @version 1.12.8
+ *
+ * @version 1.12.10
  *
  * @copyright Copyright (c) 2014, Opmantek
  * @license http://www.gnu.org/licenses/agpl-3.0.html aGPL v3
@@ -40,7 +40,7 @@ if (!defined('BASEPATH')) {
 
 if (!function_exists('snmp_credentials')) {
     /**
-     * The SNMP credentials test. 
+     * The SNMP credentials test.
      *
      * @access    public
      *
@@ -132,7 +132,7 @@ if (!function_exists('snmp_credentials')) {
                 $priv_protocol = $credential->credentials->privacy_protocol ?: '';
                 $priv_passphrase = $credential->credentials->privacy_passphrase ?: '';
                 $oid = "1.3.6.1.2.1.1.2.0";
-                if (@snmp3_get( $ip, $sec_name ,$sec_level ,$auth_protocol ,$auth_passphrase ,$priv_protocol , $priv_passphrase , $oid, $timeout, $retries)) {
+                if (@snmp3_get($ip, $sec_name, $sec_level, $auth_protocol, $auth_passphrase, $priv_protocol, $priv_passphrase, $oid, $timeout, $retries)) {
                     $credential->credentials->version = 3;
                     $log->message = "Credential set for SNMPv3 from " . $from . " working on " . $ip;
                     stdlog($log);
@@ -175,7 +175,7 @@ if (!function_exists('my_snmp_get')) {
                 $auth_passphrase = $credentials->credentials->authentication_passphrase ?: '';
                 $priv_protocol = $credentials->credentials->privacy_protocol ?: '';
                 $priv_passphrase = $credentials->credentials->privacy_passphrase ?: '';
-                $string = @snmp3_get( $ip, $sec_name ,$sec_level ,$auth_protocol ,$auth_passphrase ,$priv_protocol , $priv_passphrase , $oid, $timeout, $retries);
+                $string = @snmp3_get($ip, $sec_name, $sec_level, $auth_protocol, $auth_passphrase, $priv_protocol, $priv_passphrase, $oid, $timeout, $retries);
                 break;
             
             default:
@@ -237,7 +237,7 @@ if (!function_exists('my_snmp_walk')) {
                 $auth_passphrase = $credentials->credentials->authentication_passphrase ?: '';
                 $priv_protocol = $credentials->credentials->privacy_protocol ?: '';
                 $priv_passphrase = $credentials->credentials->privacy_passphrase ?: '';
-                $array = @snmp3_walk( $ip, $sec_name ,$sec_level ,$auth_protocol ,$auth_passphrase ,$priv_protocol , $priv_passphrase , $oid, $timeout, $retries);
+                $array = @snmp3_walk($ip, $sec_name, $sec_level, $auth_protocol, $auth_passphrase, $priv_protocol, $priv_passphrase, $oid, $timeout, $retries);
                 break;
             
             default:
@@ -301,7 +301,7 @@ if (!function_exists('my_snmp_real_walk')) {
                 $auth_passphrase = $credentials->credentials->authentication_passphrase ?: '';
                 $priv_protocol = $credentials->credentials->privacy_protocol ?: '';
                 $priv_passphrase = $credentials->credentials->privacy_passphrase ?: '';
-                $array = @snmp3_real_walk( $ip, $sec_name ,$sec_level ,$auth_protocol ,$auth_passphrase ,$priv_protocol , $priv_passphrase , $oid, $timeout, $retries);
+                $array = @snmp3_real_walk($ip, $sec_name, $sec_level, $auth_protocol, $auth_passphrase, $priv_protocol, $priv_passphrase, $oid, $timeout, $retries);
                 break;
             
             default:
@@ -916,7 +916,7 @@ if (!function_exists('snmp_audit')) {
 
         $return_array = array('details' => $details, 'interfaces' => $interfaces_filtered, 'guests' => $guests, 'modules' => $modules, 'ip' => $return_ips);
         return($return_array);
-}
+    }
 
     function format_mac($mac_address)
     {
@@ -955,8 +955,11 @@ if (!function_exists('snmp_audit')) {
             # join it back together
             $mac_address = implode(":", $mymac);
         }
-
-        return($mac_address);
+        if (substr_count($mac_address, ':') != 0) {
+            return($mac_address);
+        } else {
+            return "";
+        }
     }
 
     function ip_enabled($ip_enabled)

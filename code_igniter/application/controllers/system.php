@@ -29,7 +29,7 @@
  * @author Mark Unwin <marku@opmantek.com>
  *
  * 
- * @version 1.12.8
+ * @version 1.12.10
  *
  * @copyright Copyright (c) 2014, Opmantek
  * @license http://www.gnu.org/licenses/agpl-3.0.html aGPL v3
@@ -371,7 +371,7 @@ class System extends CI_Controller
             unset($log_details);
 
             $details->original_last_seen = "";
-            echo "SystemID (new): <a href='" . base_url() . "index.php/main/system_display/" . $details->id . "'>" . $details->id . "</a>.<br />\n";
+            echo "SystemID (new): <a href='" . base_url() . "index.php/devices/" . $details->id . "'>" . $details->id . "</a>.<br />\n";
         } else {
             // update an existing system
 

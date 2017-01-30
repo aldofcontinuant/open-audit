@@ -28,7 +28,7 @@
  * @author Mark Unwin <marku@opmantek.com>
  *
  * 
- * @version 1.12.8
+ * @version 1.12.10
  *
  * @copyright Copyright (c) 2014, Opmantek
  * @license http://www.gnu.org/licenses/agpl-3.0.html aGPL v3
@@ -83,8 +83,8 @@ class M_systems extends MY_Model
             // now create the search statement
             if ($table != 'system') {
                 $sql = "SELECT DISTINCT(system.id) AS `system.id`, system.icon, system.hostname, system.domain, system.ip, system.type, `$table`.id, $select_string
-			            FROM system, oa_group_sys, $table
-			            WHERE system.id = $table.system_id AND system.id = oa_group_sys.system_id AND oa_group_sys.group_id = '".$group_id."' AND $table.current = 'y' AND ( $search_string )  AND `$table`.current = 'y' GROUP BY `$table`.`id`";
+			            FROM system, oa_group_sys, `$table`
+			            WHERE system.id = `$table`.system_id AND system.id = oa_group_sys.system_id AND oa_group_sys.group_id = '".$group_id."' AND ( $search_string )  AND `$table`.current = 'y' GROUP BY `$table`.`id`";
             } else {
                 $sql = "SELECT DISTINCT(system.id) AS `system.id`, system.icon, system.hostname, system.domain, system.ip, system.type, $select_string
                         FROM system, oa_group_sys
