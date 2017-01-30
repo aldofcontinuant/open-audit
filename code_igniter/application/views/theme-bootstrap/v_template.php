@@ -51,6 +51,7 @@ include "v_lang.php";
     <script src="<?php echo $this->config->config['oa_web_folder']; ?>/js/jquery.min.js"></script>
     <script src="<?php echo $this->config->config['oa_web_folder']; ?>/js/bootstrap.min.js"></script>
     <script src="<?php echo $this->config->config['oa_web_folder']; ?>/js/bootstrap-table.min.js"></script>
+    <script src="<?php echo $this->config->config['oa_web_folder']; ?>/theme-tango/tango-files/jquery/js/jquery.tablesorter.min.js"></script>
     <!-- Open-AudIT specific items -->
     <script>
 <?php
