@@ -740,7 +740,7 @@ class main extends MY_Controller
             redirect('main');
         }
         $this->m_attachment->delete_attachment($attachment_id);
-        unlink($attachment->att_filename);
+        unlink($attachment->filename);
         redirect("main/system_display/".$attachment->system_id);
     }
 
@@ -762,13 +762,13 @@ class main extends MY_Controller
             redirect('main');
         }
         $this->load->helper('file');
-        $i = explode('/', $attachment->att_filename);
+        $i = explode('/', $attachment->filename);
         $filename = $i[count($i)-1];
-        header('Content-Type: '.get_mime_by_extension($attachment->att_filename));
+        header('Content-Type: '.get_mime_by_extension($attachment->filename));
         #header('Content-Disposition: attachment;filename="' . $filename . '"');
         header('Content-Disposition: inline;filename="'.$filename.'"');
         header('Cache-Control: max-age=0');
-        readfile($attachment->att_filename);
+        readfile($attachment->filename);
     }
 
     public function download_attachment()
@@ -789,13 +789,13 @@ class main extends MY_Controller
             redirect('main');
         }
         $this->load->helper('file');
-        $i = explode('/', $attachment->att_filename);
+        $i = explode('/', $attachment->filename);
         $filename = $i[count($i)-1];
-        header('Content-Type: '.get_mime_by_extension($attachment->att_filename));
+        header('Content-Type: '.get_mime_by_extension($attachment->filename));
         header('Content-Disposition: attachment;filename="'.$filename.'"');
         #header('Content-Disposition: inline;filename="' . $filename . '"');
         header('Cache-Control: max-age=0');
-        readfile($attachment->att_filename);
+        readfile($attachment->filename);
     }
 
     public function system_summary()

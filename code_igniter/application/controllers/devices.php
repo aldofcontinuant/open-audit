@@ -117,7 +117,7 @@ class devices extends MY_Controller
         $this->response->included = array();
         // if we're displaying a web page, get ALL the data
         if (($this->response->meta->format == 'screen' and $this->response->meta->include == '') or $this->response->meta->include == '*' or $this->response->meta->include == 'all') {
-            $this->response->meta->include = 'additional_fields,audit_log,bios,change_log,credential,disk,dns,edit_log,file,ip,location,log,memory,module,monitor,motherboard,netstat,network,nmap,optical,partition,pagefile,print_queue,processor,purchase,route,san,scsi,service,server,server_item,share,software,software_key,sound,task,user,user_group,variable,video,vm,windows';
+            $this->response->meta->include = 'attachment,additional_fields,audit_log,bios,change_log,credential,disk,dns,edit_log,file,ip,location,log,memory,module,monitor,motherboard,netstat,network,nmap,optical,partition,pagefile,print_queue,processor,purchase,route,san,scsi,service,server,server_item,share,software,software_key,sound,task,user,user_group,variable,video,vm,windows';
         }
 
         if ($this->response->meta->sub_resource != '') {
@@ -248,6 +248,7 @@ class devices extends MY_Controller
             output($this->response);
             exit();
         }
+        if ($this->response->meta->sub_resource)
         $this->m_devices->sub_resource_delete($this->response->meta->id, $this->response->meta->sub_resource, $this->response->meta->sub_resource_id);
         if ($this->response->meta->format == 'json') {
             output($this->response);
@@ -266,9 +267,24 @@ class devices extends MY_Controller
             $this->response->data[] = $temp;
             unset($temp);
             output($this->response);
+        } elseif ($this->response->meta->sub_resource == 'attachment') {
+            $this->response->meta->action = 'create_form_attachment';
+            $this->response->data = array();
+            $temp = new stdClass();
+            $temp->type = $this->response->meta->collection;
+            $this->response->data[] = $temp;
+            unset($temp);
+            output($this->response);
         } else {
             redirect('devices');
         }
+        $log = new stdClass();
+        $log->detail = json_encode($this->response->meta);
+        $log->severity = 6;
+        $log->status = 'finish';
+        $log->object = $this->response->meta->collection;
+        $log->function = strtolower($this->response->meta->collection) . '::' . strtolower($this->response->meta->action);
+        stdLog($log);
     }
 
     private function sub_resource_create()
@@ -287,6 +303,23 @@ class devices extends MY_Controller
                 redirect('devices');
             }
         }
+    }
+
+    private function download()
+    {
+        $attachment = $this->m_devices->read_sub_resource($this->response->meta->id, $this->response->meta->sub_resource, $this->response->meta->sub_resource_id);
+        $this->load->helper('file');
+        if (php_uname('s') == 'Windows NT') {
+            $i = explode('\\', $attachment[0]->attributes->filename);
+        } else {
+            $i = explode('/', $attachment[0]->attributes->filename);
+        }
+        $filename = $i[count($i)-1];
+        $filename = preg_replace('/'.$this->response->meta->id.'_/', '', $filename, 1);
+        header('Content-Type: '.get_mime_by_extension($attachment[0]->attributes->filename));
+        header('Content-Disposition: attachment;filename="'.$filename.'"');
+        header('Cache-Control: max-age=0');
+        readfile($attachment[0]->attributes->filename);
     }
 
     private function delete()

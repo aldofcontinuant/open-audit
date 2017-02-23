@@ -290,7 +290,8 @@ class M_devices extends MY_Model
         }
     }
 
-    public function sub_resource_delete($id = 0, $sub_resource = 0, $sub_resource_id = 0) {
+    public function sub_resource_delete($id = 0, $sub_resource = 0, $sub_resource_id = 0)
+    {
         $CI = & get_instance();
         if (empty($id)) {
             if (!empty($CI->response->meta->id)) {
@@ -318,7 +319,18 @@ class M_devices extends MY_Model
         if (empty($sub_resource_id)) {
             return false;
         }
-        $sql = "DELETE FROM `" . (string)$sub_resource . "` WHERE `system_id` = ? AND id = ?";
+        if ($sub_resource == 'attachment') {
+            $sql = "SELECT * FROM attachment WHERE id = " . intval($sub_resource_id);
+            $attachment = $this->run_sql($sql, array());
+            if (unlink($attachment[0]->filename)) {
+                // good
+            } else {
+                // TODO - log an error here
+                echo "Could not delete $filename.";
+                exit();
+            }
+        }
+        $sql = "/* m_devices::sub_resource_delete */ " . "DELETE FROM `" . (string)$sub_resource . "` WHERE `system_id` = ? AND id = ?";
         $data = array(intval($id), intval($sub_resource_id));
         $result = $this->run_sql($sql, $data);
         if ($this->db->affected_rows() > 0) {
@@ -331,27 +343,31 @@ class M_devices extends MY_Model
     public function sub_resource_create($id = 0, $sub_resource = '', $data = '')
     {
         $CI = & get_instance();
-        $CI = & get_instance();
         $log = new stdClass();
         $log->file = 'system';
         $log->level = 7;
         $log->message = "sub_resource_create start.";
         stdlog($log);
 
+        if (!empty($id)) {
+            $device_ids[] = $id;
+        } elseif (!empty($CI->response->meta->received_data->ids)) {
+            $device_ids = explode(',', $CI->response->meta->received_data->ids);
+        } elseif (!empty($CI->response->meta->id)) {
+            $device_ids = array($CI->response->meta->id);
+        } else {
+            $log->level = 5;
+            $log->message = "No ID, nor list of IDs supplied to sub_resource_create.";
+            stdlog($log);
+            return false;
+        }
+
+        if (empty($sub_resource)) {
+            $sub_resource = $CI->response->meta->sub_resource;
+        }
+
         if ($sub_resource == 'credential' or (!empty($CI->response->meta->sub_resource) and $CI->response->meta->sub_resource == 'credential')) {
             $this->load->library('encrypt');
-
-            if (!empty($id)) {
-                $device_ids[] = $id;
-            } elseif (!empty($CI->response->meta->received_data->ids)) {
-                $device_ids = explode(',', $CI->response->meta->received_data->ids);
-            } elseif (!empty($CI->response->meta->id)) {
-                $device_ids = array($CI->response->meta->id);
-            } else {
-                $log->message = "No ID, nor list of IDs supplied to sub_resource_create.";
-                stdlog($log);
-                return false;
-            }
 
             foreach ($device_ids as $id) {
                 if (!empty($data->credentials)) {
@@ -359,6 +375,7 @@ class M_devices extends MY_Model
                 } elseif (!empty($CI->response->meta->received_data->attributes->credentials)) {
                     $credentials = $this->encrypt->encode(json_encode($CI->response->meta->received_data->attributes->credentials));
                 } else {
+                    $log->level = 5;
                     $log->message = "No credentials supplied to sub_resource_create.";
                     stdlog($log);
                     return false;
@@ -369,6 +386,7 @@ class M_devices extends MY_Model
                 } elseif (!empty($CI->response->meta->received_data->attributes->type)) {
                     $type = $CI->response->meta->received_data->attributes->type;
                 } else {
+                    $log->level = 5;
                     $log->message = "No credential type supplied to sub_resource_create.";
                     stdlog($log);
                     return false;
@@ -397,20 +415,130 @@ class M_devices extends MY_Model
                 }
 
                 # we only store a SINGLE credential set of each type per device - delete any existing
-                $sql = "DELETE FROM `credential` WHERE `system_id` = ? AND `type` = ?";
+                $sql = "/* m_devices::sub_resource_create */ " . "DELETE FROM `credential` WHERE `system_id` = ? AND `type` = ?";
                 $data = array(intval($id), (string)$type);
                 $this->run_sql($sql, $data);
                 # insert the new credentials
-                $sql = "INSERT INTO `credential` VALUES (NULL, ?, 'y', ?, ?, ?, ?, ?, NOW())";
+                $sql = "/* m_devices::sub_resource_create */ " . "INSERT INTO `credential` VALUES (NULL, ?, 'y', ?, ?, ?, ?, ?, NOW())";
                 $data = array(intval($id), (string)$name, (string)$description, (string)$type, (string)$credentials, (string)$user);
                 $this->run_sql($sql, $data);
             }
             return true;
+        } else if ($sub_resource == 'attachment') {
+            if (empty($_FILES['attachment'])) {
+                $log->severity = 5;
+                $log->summary = "No file provided to PHP for sub_resource_create.";
+                $log->status = 'error';
+                stdlog($log);
+                return false;
+            }
+            $target = BASEPATH."../application/attachments/".$CI->response->meta->id."_".basename($_FILES['attachment']['name']);
+            if (move_uploaded_file($_FILES['attachment']['tmp_name'], $target)) {
+                $sql = "INSERT INTO `attachment` VALUES (NULL, ?, ?, ?, ?, NOW())";
+                $data = array(intval($CI->response->meta->id), 
+                            intval($CI->user->id),
+                            $CI->response->meta->received_data->attributes->title,
+                            "$target");
+                $query = $this->db->query($sql, $data);
+                return true;
+            } else {
+                $log->severity = 5;
+                $log->summary = "Unable to move uploaded file.";
+                $log->status = 'error';
+                $log->detail = error_get_last();
+                stdlog($log);
+                return false;
+            }
         } else {
-            $log->message = "sub_resource not equal to credential - exiting.";
+            $log->summary = "sub_resource not equal to credential or attachment - exiting.";
             stdlog($log);
+            return false;
         }
     }
+
+    // public function sub_resource_create($id = 0, $sub_resource = '', $data = '')
+    // {
+    //     $CI = & get_instance();
+    //     $CI = & get_instance();
+    //     $log = new stdClass();
+    //     $log->file = 'system';
+    //     $log->level = 7;
+    //     $log->message = "sub_resource_create start.";
+    //     stdlog($log);
+
+    //     if ($sub_resource == 'credential' or (!empty($CI->response->meta->sub_resource) and $CI->response->meta->sub_resource == 'credential')) {
+    //         $this->load->library('encrypt');
+
+    //         if (!empty($id)) {
+    //             $device_ids[] = $id;
+    //         } elseif (!empty($CI->response->meta->received_data->ids)) {
+    //             $device_ids = explode(',', $CI->response->meta->received_data->ids);
+    //         } elseif (!empty($CI->response->meta->id)) {
+    //             $device_ids = array($CI->response->meta->id);
+    //         } else {
+    //             $log->message = "No ID, nor list of IDs supplied to sub_resource_create.";
+    //             stdlog($log);
+    //             return false;
+    //         }
+
+    //         foreach ($device_ids as $id) {
+    //             if (!empty($data->credentials)) {
+    //                 $credentials = $this->encrypt->encode(json_encode($data->credentials));
+    //             } elseif (!empty($CI->response->meta->received_data->attributes->credentials)) {
+    //                 $credentials = $this->encrypt->encode(json_encode($CI->response->meta->received_data->attributes->credentials));
+    //             } else {
+    //                 $log->message = "No credentials supplied to sub_resource_create.";
+    //                 stdlog($log);
+    //                 return false;
+    //             }
+
+    //             if (!empty($data->type)) {
+    //                 $type = $data->type;
+    //             } elseif (!empty($CI->response->meta->received_data->attributes->type)) {
+    //                 $type = $CI->response->meta->received_data->attributes->type;
+    //             } else {
+    //                 $log->message = "No credential type supplied to sub_resource_create.";
+    //                 stdlog($log);
+    //                 return false;
+    //             }
+
+    //             if (!empty($data->name)) {
+    //                 $name = $data->name;
+    //             } elseif (!empty($CI->response->meta->received_data->attributes->name)) {
+    //                 $name = $CI->response->meta->received_data->attributes->name;
+    //             } else {
+    //                 $name = '';
+    //             }
+
+    //             if (!empty($data->description)) {
+    //                 $description = $data->description;
+    //             } elseif (!empty($CI->response->meta->received_data->attributes->description)) {
+    //                 $description = $CI->response->meta->received_data->attributes->description;
+    //             } else {
+    //                 $description = '';
+    //             }
+
+    //             if (!empty($CI->user->full_name)) {
+    //                 $user = $CI->user->full_name;
+    //             } else {
+    //                 $user = '';
+    //             }
+
+    //             # we only store a SINGLE credential set of each type per device - delete any existing
+    //             $sql = "DELETE FROM `credential` WHERE `system_id` = ? AND `type` = ?";
+    //             $data = array(intval($id), (string)$type);
+    //             $this->run_sql($sql, $data);
+    //             # insert the new credentials
+    //             $sql = "INSERT INTO `credential` VALUES (NULL, ?, 'y', ?, ?, ?, ?, ?, NOW())";
+    //             $data = array(intval($id), (string)$name, (string)$description, (string)$type, (string)$credentials, (string)$user);
+    //             $this->run_sql($sql, $data);
+    //         }
+    //         return true;
+    //     } else {
+    //         $log->message = "sub_resource not equal to credential - exiting.";
+    //         stdlog($log);
+    //     }
+    // }
 
     public function collection()
     {

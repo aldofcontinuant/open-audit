@@ -376,12 +376,12 @@
 				<tbody>
 					<?php foreach ($attachment as $key): ?>
 					<tr>
-						<td><?php echo print_something($key->att_title)?></td>
+						<td><?php echo print_something($key->title)?></td>
 						<td><?php echo print_something($key->timestamp)?></td>
-						<td align='center'><a href="<?php echo base_url(); ?>index.php/main/show_attachment/<?php echo print_something($key->att_id)?>"><img src='<?php echo $oa_theme_images; ?>/16_word.png' alt='' title='' /></a></td>
-						<td align='center'><a href="<?php echo base_url(); ?>index.php/main/download_attachment/<?php echo print_something($key->att_id)?>"><img src='<?php echo $oa_theme_images; ?>/16_link.png' alt='' title='' /></a></td>
+						<td align='center'><a href="<?php echo base_url(); ?>index.php/main/show_attachment/<?php echo print_something($key->id)?>"><img src='<?php echo $oa_theme_images; ?>/16_word.png' alt='' title='' /></a></td>
+						<td align='center'><a href="<?php echo base_url(); ?>index.php/main/download_attachment/<?php echo print_something($key->id)?>"><img src='<?php echo $oa_theme_images; ?>/16_link.png' alt='' title='' /></a></td>
 						<?php if ($access_level > 7) { ?>
-						<td align='center'><a href="<?php echo base_url(); ?>index.php/main/delete_attachment/<?php echo print_something($key->att_id)?>"><img src='<?php echo $oa_theme_images; ?>/16_delete.png' alt='' title='' /></a></td>
+						<td align='center'><a href="<?php echo base_url(); ?>index.php/main/delete_attachment/<?php echo print_something($key->id)?>"><img src='<?php echo $oa_theme_images; ?>/16_delete.png' alt='' title='' /></a></td>
 						<?php } ?>
 					</tr>
 					<?php endforeach; ?>

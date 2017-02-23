@@ -975,8 +975,7 @@ foreach ($list as $item) {
                             <th>ID</th>
                             <th>Title</th>
                             <th>Filename</th>
-                            <th>Edited By</th>
-                            <th>Edited Date</th>
+                            <th>Uploaded On</th>
                             <th style="text-align:center;">Download</td>
                             <th style="text-align:center;">Delete</td>
                         </tr>
@@ -995,8 +994,7 @@ foreach ($list as $item) {
                             echo "<td>" . $item->id . "</td>";
                             echo "<td>" . $item->title . "</td>";
                             echo "<td>" . $filename . "</td>";
-                            echo "<td>" . $item->edited_by . "</td>";
-                            echo "<td>" . $item->edited_date . "</td>";
+                            echo "<td>" . $item->timestamp . "</td>";
                             ?>
                             <td class="text-center"><a class="btn btn-sm btn-primary" href="<?php echo $this->response->links->self; ?>?sub_resource=attachment&sub_resource_id=<?php echo intval($item->id); ?>&action=download"><span class="glyphicon glyphicon-download" aria-hidden="true"></span></a></td>
                             <td style="text-align:center;"><button type="button" class="btn btn-sm btn-danger" aria-label="Left Align" ><span class="glyphicon glyphicon-trash subresource_delete_link" data-sub-resource-id="<?php echo intval($item->id); ?>" data-sub-resource="attachment" data-name="<?php echo htmlspecialchars($item->title, REPLACE_FLAGS, CHARSET); ?>" aria-hidden="true"></span></button></td>
